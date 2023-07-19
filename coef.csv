@@ -1,0 +1,17 @@
+variables,log_odds,odd_ratio,percentage_change
+bmi_categoryOverweight,1.03,2.8,-1.8%
+bmi_categoryObese,31.3,39021032912601.766,-39021032912600.8%
+occupationEngineer,1.55,4.72,-3.72%
+occupationLawyer,0.85,2.34,-1.34%
+occupationAccountant,3.8,44.64,-43.64%
+occupationNurse,3.34,28.31,-27.31%
+occupationTeacher,3.06,21.35,-20.35%
+`occupationSoftware Engineer`,-14.53,0,1%
+occupationScientist,1.5,4.47,-3.47%
+occupationSalesperson,4.51,90.86,-89.86%
+occupationManager,-16.44,0,1%
+`occupationSales Representative`,-11.95,0,1%
+sleep_duration,-0.7,0.5,0.5%
+blood_pressureElevated,3.17,23.74,-22.74%
+blood_pressureHypertension,4.77,117.9,-116.9%
+daily_steps,-0,1,0%

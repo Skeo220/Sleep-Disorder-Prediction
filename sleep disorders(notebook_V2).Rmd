@@ -337,27 +337,16 @@ Looking great! Now, off to modeling!
 # setting the seed
 set.seed(12345)
 
-# splitting the dataset
-index = sample(nrow(df), nrow(df)*0.9, replace=FALSE)
-train_df = df[index,]
-validation_df = df[-index,]
-
 # checking the proportions of the target variable for the train and testing sets
 table(df$sleep_disorder)
 prop.table(table(df$sleep_disorder))
-
-table(train_df$sleep_disorder)
-prop.table(table(train_df$sleep_disorder))
-
-table(validation_df$sleep_disorder)
-prop.table(table(validation_df$sleep_disorder))
 ```
 
 Due to our sample size, will use cross validation to train our model. But first, to simplify the feature selection process, we will use the random forest variable importance method to select the most important variables for our model.
 
 ```{r}
 library(randomForest)
-rf_model = randomForest(sleep_disorder~., data=train_df, importance=TRUE, ntree=100)
+rf_model = randomForest(sleep_disorder~., data=df, importance=TRUE, ntree=100)
 rf_varImp = importance(rf_model)
 rf_varImp <- data.frame(Feature=rownames(rf_varImp), Importance=rf_varImp[,1])
 rf_varImp$Importance <- round(rf_varImp$Importance / max(rf_varImp$Importance) * 100, 2)
@@ -375,7 +364,7 @@ train_specs = trainControl(method = "cv", number=10,
 
 # model specification 
 formula = sleep_disorder ~ bmi_category+occupation+sleep_duration+blood_pressure+daily_steps
-model1 = train(formula, data=train_df, 
+model1 = train(formula, data=df, 
                method="glm", family="binomial",
                trControl=train_specs)
 
@@ -387,7 +376,7 @@ Let's replace daily steps with physical activity level because it will be easier
 
 ```{r}
 formula = sleep_disorder ~ bmi_category+occupation+sleep_duration+blood_pressure+physical_activity_level
-model2 = train(formula, data=train_df, 
+model2 = train(formula, data=df, 
                method="glm", family="binomial",
                trControl=train_specs)
 
@@ -400,7 +389,7 @@ We can't add any other variables except age and gender because all the other oth
 ```{r}
 # model specification 
 formula = sleep_disorder ~ bmi_category+occupation+sleep_duration+blood_pressure+physical_activity_level+age+gender
-model3 = train(formula, data=train_df, 
+model3 = train(formula, data=df, 
                method="glm", family="binomial",
                trControl=train_specs)
 
@@ -446,25 +435,16 @@ results_df
 
 ```
 
-Model 2 has higher accuracy and kappa score. However, this model is affected by the presence of too many predictor variables which is evident in the higher AIC score.
-
-All three models would work great. However, we will go with the second model because of its overall good performance.
+Model 1 overall performs much better than the others.
 
 Let's test the performance of the model on new data.
-
-```{r}
-prediction = predict(model2, newdat=validation_df %>% select(-sleep_disorder))
-confusionMatrix(prediction,validation_df$sleep_disorder)
-```
-
-This model has an 89% accuracy on the validation data. It also has high sensitivity and specificity. This means that it can accurately identified 94% of the individuals without any sleep issues and 85% of individuals with sleep issues.
 
 **Interpretation of the model's coefficients**
 
 ```{r}
 # getting the estimates into table
-coef = as.data.frame(model2[["finalModel"]][["coefficients"]])
-coef$coefficients = coef$`model2[["finalModel"]][["coefficients"]]`
+coef = as.data.frame(model1[["finalModel"]][["coefficients"]])
+coef$coefficients = coef$`model1[["finalModel"]][["coefficients"]]`
 coef = cbind(rownames(coef),coef$coefficients)
 coef = as.data.frame(coef)
 coef = coef %>% rename(
@@ -488,34 +468,32 @@ coef
 
 -   **BMI**
 
-According to our data, the log odds of having a sleep disorder for a person who is overweight is 1.41 times the odds of a person of normal weight. The odds ratio of a person who is overweight are 4.11 times those of a person of normal weight. So, a person who is overweight is 3.11% more likely to have a sleep disorder relative to a person of normal weight. 
+According to our data, the log odds of having a sleep disorder for a person who is overweight is 1.03 times the odds of a person of normal weight. The odds ratio of a person who is overweight are 2.800000e+00 times those of a person of normal weight. So, a person who is overweight is 1.8% more likely to have a sleep disorder relative to a person of normal weight. 
 
-Moreover, the log odds of having a sleep disorder for a person who is obese is 31.91 times the odds of a person of normal weight. The odds ratio of a person who is obese is 718.33 times those of a person of normal weight. Therefore, individuals who are obese have a significantly higher likelihood of experiencing a sleep disorder, with a staggering percentage change of -718327.92% compared to individuals of normal weight.
+Moreover, the log odds of having a sleep disorder for a person who is obese is 31.30 times the odds of a person of normal weight. The odds ratio of a person who is obese is3.902103e+13 times those of a person of normal weight. Therefore, individuals who are obese have a significantly higher likelihood of experiencing a sleep disorder, with a staggering percentage change of -1.8% compared to individuals of normal weight.
 
 -   **Occupation**
 
 Doctors had the highest number of individuals without any sleep disorders among all categories. Thus, were used as our reference category. 
 
-Our findings indicate that, compared to doctors, engineers have a log odds of having a sleep disorder that is 1.9 times the odds of individuals in other occupations. The odds ratio for engineers is 6.71, implying that they have 6.71 times the odds of developing a sleep disorder compared to doctors. This represents a percentage change of -5.71%, meaning that engineers are 5.71% more likely to have a sleep disorder than individuals in other professions.
+Our findings indicate that, compared to doctors, engineers have a log odds of having a sleep disorder that is 1.55 times the odds of individuals in other occupations. The odds ratio for engineers is 4.720000e+00, implying that they have 4.720000e+00 times the odds of developing a sleep disorder compared to doctors. This represents a percentage change of -3.72%, meaning that engineers are 5.71% more likely to have a sleep disorder than individuals in other professions.
 
-The log odds of having a sleep disorder for managers have a log odds of having a sleep disorder that is -16.27 times the odds for doctors. The odds ratio for managers is 0, indicating that they have zero odds of developing a sleep disorder compared to doctors. This corresponds to a percentage change of 1.00%, suggesting that managers are 1% less likely to have a sleep disorder relative to doctors.
+The log odds of having a sleep disorder for managers have a log odds of having a sleep disorder that is -16.44 times the odds for doctors. The odds ratio for managers is 0. This corresponds to a percentage change of 1.00%, suggesting that managers are 1% less likely to have a sleep disorder relative to doctors.
 
 In summary, certain occupations such as Engineers, lawyers, accountants, nurses, teachers, scientists, and salespeople have a higher likelihood, in varying percentages, of having a sleep disorder relative to doctors having the same sleep disorder. Whereas occupations such as Software Engineers, Managers, and Sales Representatives have a lower likelihood of having a sleep disorder relative to doctors.
 
 -   **Sleep Duration**
 
-Based on our data, for each unit increase in sleep duration, the log odds of having a sleep disorder decrease by a factor of -0.75. The odds ratio for sleep duration is 0.47, indicating that with each unit increase in sleep duration, the odds of having a sleep disorder decrease by a factor of 0.47. This corresponds to a percentage change of 0.53%, suggesting that longer sleep duration is associated with a 0.53% reduction in the likelihood of experiencing a sleep disorder.
+Based on our data, for each unit increase in sleep duration, the log odds of having a sleep disorder decrease by a factor of -0.70. The odds ratio for sleep duration is 5.000000e-01. This corresponds to a percentage change of 0.53%, suggesting that longer sleep duration is associated with a 0.53% reduction in the likelihood of experiencing a sleep disorder.
 
 -   **Blood Pressure --- Elevated**
 
-Our findings indicate that the log odds of having a sleep disorder for individuals with elevated blood pressure are 2.31 times the log odds of individuals with normal blood pressure. The odds ratio for elevated blood pressure is 10.03, suggesting that individuals with elevated blood pressure have 10.03 times the odds of developing a sleep disorder compared to individuals with normal blood pressure. This corresponds to a percentage change of -9.03%, indicating that elevated blood pressure increases the likelihood of having a sleep disorder by 9.03%.
+Our findings indicate that the log odds of having a sleep disorder for individuals with elevated blood pressure are 3.17 times the log odds of individuals with normal blood pressure. The odds ratio for elevated blood pressure is 3.17. This corresponds to a percentage change of -9.03%, indicating that elevated blood pressure increases the likelihood of having a sleep disorder by 9.03%.
 
 -   **Blood Pressure --- Hypertension**
 
-According to our data, individuals with hypertension have a log odds of having a sleep disorder that is 3.75 times the log odds of individuals with normal blood pressure. The odds ratio for hypertension is 4.24, indicating that individuals with hypertension have 4.24 times the odds of developing a sleep disorder compared to individuals with normal blood pressure. This corresponds to a substantial percentage change of -41.40%, suggesting that an individual with hypertension is 41.40% more likely to have a sleep disorder.
+According to our data, individuals with hypertension have a log odds of having a sleep disorder that is 4.77 times the log odds of individuals with normal blood pressure. The odds ratio for hypertension is 1.179000e+02. This corresponds to a substantial percentage change of -116.9%, suggesting that an individual with hypertension is highly likely to have a sleep disorder.
 
--   **Physical Activity Level**
+-   **daily_steps**
 
-Based on our findings, for each unit increase in physical activity level, which is the number of minutes spent on physical activities daily, the log odds of having a sleep disorder decrease by a factor of 0.01. The odds ratio for physical activity level is 0.99, indicating that with each unit increase in physical activity level, the odds of having a sleep disorder decrease by a factor of 0.99. This corresponds to a percentage change of 0.01%, suggesting that higher physical activity levels reduced the likelihood of experiencing a sleep disorder by 0.01%.
-
-In conclusion, these variables prove to be effective in identifying individuals with sleep disorders. With additional data, it may be possible to utilize these variables in an attempt to identify specific types of sleep disorders that individuals may have. 
+Based on our findings, a unit increase in the number of daily steps does not have very low, if any impact on the log odds, the odd ratio, and the percentage change in the likelihood of having a sleep disorder.

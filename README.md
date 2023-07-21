@@ -1,4 +1,5 @@
 # Sleep-Disorder-Prediction
+To view the summary on medium, click **[here](https://medium.com/@StephanKeo/understanding-sleep-disorders-5ab6757eb1be)**.
 ## Project Description
 
 In this data analytics portfolio project, I embarked on an intriguing exploration of the essential yet enigmatic aspect of our lives - sleep. The restless nights, fatigue, and yearning for restorative slumber prompted me to delve into the myriad of factors that impact our sleep but often go unnoticed amidst the bustling realm of daily life.

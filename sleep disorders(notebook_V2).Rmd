@@ -496,4 +496,4 @@ According to our data, individuals with hypertension have a log odds of having a
 
 -   **daily_steps**
 
-Based on our findings, a unit increase in the number of daily steps does not have very low, if any impact on the log odds, the odd ratio, and the percentage change in the likelihood of having a sleep disorder.
+Based on our findings, a unit increase in the number of daily steps has very low, if any impact on the log odds, the odd ratio, and the percentage change in the likelihood of having a sleep disorder.
